@@ -6,6 +6,8 @@
 #pragma comment(lib, "dwmapi.lib")
 #pragma comment(lib, "uxtheme.lib")
 
+#include "imgui_impl_win32.h"
+
 enum Style : DWORD
 {
     windowed = WS_OVERLAPPEDWINDOW,
@@ -322,9 +324,15 @@ void Window::executeEventCallback(const xwin::Event e)
     if (mCallback) mCallback(e);
 }
 
+// Forward declare message handler from imgui_impl_win32.cpp
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 LRESULT CALLBACK Window::WindowProcStatic(HWND hwnd, UINT msg, WPARAM wparam,
                                           LPARAM lparam)
 {
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+		return true;
+	
     Window* _this;
     if (_windowBeingCreated != nullptr)
     {
